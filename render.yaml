@@ -1,12 +1,9 @@
 services:
-  # Application Laravel via Docker
   - type: web
     name: ecnpri-app
     runtime: docker
     repo: https://github.com/tresorkabis/sale.git
     plan: free
-    buildCommand: "composer install && npm install && npm run build"
-    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
     healthCheckPath: /
     envVars:
       - key: APP_ENV
@@ -34,13 +31,10 @@ services:
           name: ecnpri-db
           property: password
 
-  # Worker pour migrations/seeders
   - type: worker
     name: ecnpri-migrate-seed
     runtime: docker
     plan: free
-    buildCommand: "composer install"
-    startCommand: "php artisan migrate:fresh --seed --seeder=CnpriSeeder --force"
     autoDeploy: false
     envVars:
       - key: APP_ENV
