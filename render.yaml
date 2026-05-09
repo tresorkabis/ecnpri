@@ -35,7 +35,7 @@ services:
       # Ajoutez ici d'autres variables d'environnement spécifiques à votre application si nécessaire (ex: MAIL_MAILER, etc.)
 
   # Service pour la base de données PostgreSQL
-  - type: postgres
+  - type: postgresql
     name: ecnpri-db
     plan: free # Plan gratuit pour la démo. Passez à 'starter' pour plus de performance/fiabilité.
     databaseName: ecnpri_db
