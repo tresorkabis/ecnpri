@@ -1,54 +1,10 @@
-# render.yaml
 services:
-  # Service pour l'application web Laravel
   - type: web
     name: ecnpri-app
-    env: docker # Indique à Render d'utiliser le Dockerfile
-    plan: free # Plan gratuit pour la démo
-    # buildCommand et startCommand sont gérés par le Dockerfile
-    healthCheckPath: / # Chemin pour vérifier la santé de l'application
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
-      - key: APP_KEY
-        generateValue: true # Render générera une clé d'application sécurisée
-      - key: DB_CONNECTION
-        value: pgsql # Type de connexion à la base de données (PostgreSQL)
-      - key: DB_HOST
-        fromDatabase:
-          name: ecnpri-db
-          property: host
-      - key: DB_DATABASE
-        fromDatabase:
-          name: ecnpri-db
-          property: database
-      - key: DB_USERNAME
-        fromDatabase:
-          name: ecnpri-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: ecnpri-db
-          property: password
-      # Ajoutez ici d'autres variables d'environnement spécifiques à votre application si nécessaire (ex: MAIL_MAILER, etc.)
-
-  # Service pour la base de données PostgreSQL
-  - type: postgres
-    name: ecnpri-db
-    plan: free # Plan gratuit pour la démo. Passez à 'starter' pour plus de performance/fiabilité.
-    databaseName: ecnpri_db
-    user: ecnpri_user
-    # Vous pouvez spécifier une version de PostgreSQL si nécessaire, ex: version: "14"
-
-  # Job pour exécuter les migrations et les seeders (à lancer manuellement après le déploiement initial)
-  - type: job
-    name: ecnpri-migrate-seed
-    env: docker # Indique à Render d'utiliser le Dockerfile
-    plan: free # Plan gratuit pour le job
-    # buildCommand et startCommand sont gérés par le Dockerfile
-    autoDeploy: false # IMPORTANT: Ne pas exécuter automatiquement à chaque déploiement pour éviter de réinitialiser la DB
+    runtime: docker
+    repo: https://github.com/tresorkabis/ecnpri.git
+    plan: free
+    healthCheckPath: /
     envVars:
       - key: APP_ENV
         value: production
@@ -74,3 +30,9 @@ services:
         fromDatabase:
           name: ecnpri-db
           property: password
+
+databases:
+  - name: ecnpri-db
+    databaseName: ecnpri_db
+    user: ecnpri_user
+    plan: free
