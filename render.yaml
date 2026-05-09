@@ -5,37 +5,7 @@ services:
     repo: https://github.com/tresorkabis/ecnpri.git
     plan: free
     healthCheckPath: /
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
-      - key: APP_KEY
-        generateValue: true
-      - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_HOST
-        fromDatabase:
-          name: ecnpri-db
-          property: host
-      - key: DB_DATABASE
-        fromDatabase:
-          name: ecnpri-db
-          property: database
-      - key: DB_USERNAME
-        fromDatabase:
-          name: ecnpri-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: ecnpri-db
-          property: password
-
-  - type: worker
-    name: ecnpri-migrate-seed
-    runtime: docker
-    plan: free
-    autoDeploy: false
+    preDeployCommand: "php artisan migrate --force && php artisan db:seed --class=CnpriSeeder --force"
     envVars:
       - key: APP_ENV
         value: production
