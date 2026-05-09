@@ -35,11 +35,13 @@ services:
       # Ajoutez ici d'autres variables d'environnement spécifiques à votre application si nécessaire (ex: MAIL_MAILER, etc.)
 
   # Service pour la base de données PostgreSQL
-  - type: postgresql
+  - type: pserv
     name: ecnpri-db
-    plan: free # Plan gratuit pour la démo. Passez à 'starter' pour plus de performance/fiabilité.
+    env: postgres
+    plan: free   # gratuit pour la démo
     databaseName: ecnpri_db
     user: ecnpri_user
+
     # Vous pouvez spécifier une version de PostgreSQL si nécessaire, ex: version: "14"
 
   # Job pour exécuter les migrations et les seeders (à lancer manuellement après le déploiement initial)
