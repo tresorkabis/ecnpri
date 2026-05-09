@@ -1,9 +1,9 @@
-# render.yaml
 services:
-  # Service pour l'application web Laravel
+  # Application Laravel via Docker
   - type: web
     name: ecnpri-app
-    env: php
+    env: docker
+    plan: free
     buildCommand: "composer install && npm install && npm run build"
     startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
     healthCheckPath: /
@@ -33,19 +33,17 @@ services:
           name: ecnpri-db
           property: password
 
-  # Service pour la base de données PostgreSQL
+  # Base PostgreSQL
   - type: pserv
     name: ecnpri-db
     env: postgres
     plan: free
-#    databaseName: ecnpri_db
-#    user: ecnpri_user
     # version: "14" (optionnel)
 
-  # Worker pour exécuter les migrations et seeders
+  # Worker pour migrations/seeders
   - type: worker
     name: ecnpri-migrate-seed
-    env: php
+    env: docker
     plan: free
     buildCommand: "composer install"
     startCommand: "php artisan migrate:fresh --seed --seeder=CnpriSeeder --force"
