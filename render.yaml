@@ -38,8 +38,8 @@ services:
     name: ecnpri-db
     env: postgres
     plan: free
-    databaseName: ecnpri_db
-    user: ecnpri_user
+#    databaseName: ecnpri_db
+#    user: ecnpri_user
     # version: "14" (optionnel)
 
   # Worker pour exécuter les migrations et seeders
