@@ -8,26 +8,48 @@ services:
     startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
     healthCheckPath: /
     envVars:
-      - fromGroup: ecnpri-shared-vars
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: ecnpri-db
+          property: host
+      - key: DB_DATABASE
+        fromDatabase:
+          name: ecnpri-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: ecnpri-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ecnpri-db
+          property: password
 
-  # Job pour les migrations et le seeding (exécuté manuellement ou via API)
-  - type: job
+  # Service pour la base de données PostgreSQL
+  - type: pserv
+    name: ecnpri-db
+    env: postgres
+    plan: free
+    databaseName: ecnpri_db
+    user: ecnpri_user
+    # version: "14" (optionnel)
+
+  # Worker pour exécuter les migrations et seeders
+  - type: worker
     name: ecnpri-migrate-seed
     env: php
     plan: free
     buildCommand: "composer install"
     startCommand: "php artisan migrate:fresh --seed --seeder=CnpriSeeder --force"
-    envVars:
-      - fromGroup: ecnpri-shared-vars
-
-databases:
-  - name: ecnpri-db
-    databaseName: ecnpri_db
-    user: ecnpri_user
-    plan: free
-
-envVarGroups:
-  - name: ecnpri-shared-vars
+    autoDeploy: false
     envVars:
       - key: APP_ENV
         value: production
