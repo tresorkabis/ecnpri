@@ -2,7 +2,7 @@ services:
   - type: web
     name: ecnpri-app
     runtime: docker
-    repo: https://github.com/tresorkabis/sale.git
+    repo: https://github.com/tresorkabis/ecnpri.git
     plan: free
     healthCheckPath: /
     envVars:
