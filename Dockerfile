@@ -27,6 +27,9 @@ WORKDIR /var/www/html
 # Copy application code
 COPY . .
 
+# Increase Composer memory limit
+ENV COMPOSER_MEMORY_LIMIT=-1
+
 # Install Composer dependencies
 RUN composer install --no-dev --optimize-autoloader
 
