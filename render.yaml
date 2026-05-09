@@ -3,19 +3,19 @@ services:
   # Service pour l'application web Laravel
   - type: web
     name: ecnpri-app
-    env: php # Indique à Render que c'est une application PHP
-    buildCommand: "composer install && npm install && npm run build" # Commande pour installer les dépendances PHP et JS
-    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT" # Commande pour démarrer le serveur Laravel
-    healthCheckPath: / # Chemin pour vérifier la santé de l'application
+    env: php
+    buildCommand: "composer install && npm install && npm run build"
+    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
+    healthCheckPath: /
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        generateValue: true # Render générera une clé d'application sécurisée
+        generateValue: true
       - key: DB_CONNECTION
-        value: pgsql # Type de connexion à la base de données (PostgreSQL)
+        value: pgsql
       - key: DB_HOST
         fromDatabase:
           name: ecnpri-db
@@ -32,25 +32,24 @@ services:
         fromDatabase:
           name: ecnpri-db
           property: password
-      # Ajoutez ici d'autres variables d'environnement spécifiques à votre application si nécessaire (ex: MAIL_MAILER, etc.)
 
   # Service pour la base de données PostgreSQL
   - type: pserv
     name: ecnpri-db
     env: postgres
-    plan: free   # gratuit pour la démo
+    plan: free
     databaseName: ecnpri_db
     user: ecnpri_user
+    # version: "14" (optionnel)
 
-    # Vous pouvez spécifier une version de PostgreSQL si nécessaire, ex: version: "14"
-
-  # Job pour exécuter les migrations et les seeders (à lancer manuellement après le déploiement initial)
-  - type: job
+  # Worker pour exécuter les migrations et seeders
+  - type: worker
     name: ecnpri-migrate-seed
     env: php
-    buildCommand: "composer install" # Seulement besoin de composer pour artisan
-    startCommand: "php artisan migrate:fresh --seed --seeder=CnpriSeeder --force" # Commande de migration et de seeding
-    autoDeploy: false # IMPORTANT: Ne pas exécuter automatiquement à chaque déploiement pour éviter de réinitialiser la DB
+    plan: free
+    buildCommand: "composer install"
+    startCommand: "php artisan migrate:fresh --seed --seeder=CnpriSeeder --force"
+    autoDeploy: false
     envVars:
       - key: APP_ENV
         value: production
