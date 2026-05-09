@@ -1,54 +1,13 @@
-# render.yaml
 services:
-  # Service pour l'application web Laravel
+  # Application Laravel via Docker
   - type: web
     name: ecnpri-app
-    env: php # Indique à Render que c'est une application PHP
-    buildCommand: "composer install && npm install && npm run build" # Commande pour installer les dépendances PHP et JS
-    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT" # Commande pour démarrer le serveur Laravel
-    healthCheckPath: / # Chemin pour vérifier la santé de l'application
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
-      - key: APP_KEY
-        generateValue: true # Render générera une clé d'application sécurisée
-      - key: DB_CONNECTION
-        value: pgsql # Type de connexion à la base de données (PostgreSQL)
-      - key: DB_HOST
-        fromDatabase:
-          name: ecnpri-db
-          property: host
-      - key: DB_DATABASE
-        fromDatabase:
-          name: ecnpri-db
-          property: database
-      - key: DB_USERNAME
-        fromDatabase:
-          name: ecnpri-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: ecnpri-db
-          property: password
-      # Ajoutez ici d'autres variables d'environnement spécifiques à votre application si nécessaire (ex: MAIL_MAILER, etc.)
-
-  # Service pour la base de données PostgreSQL
-  - type: postgres
-    name: ecnpri-db
-    plan: free # Plan gratuit pour la démo. Passez à 'starter' pour plus de performance/fiabilité.
-    databaseName: ecnpri_db
-    user: ecnpri_user
-    # Vous pouvez spécifier une version de PostgreSQL si nécessaire, ex: version: "14"
-
-  # Job pour exécuter les migrations et les seeders (à lancer manuellement après le déploiement initial)
-  - type: job
-    name: ecnpri-migrate-seed
-    env: php
-    buildCommand: "composer install" # Seulement besoin de composer pour composer pour artisan
-    startCommand: "php artisan migrate:fresh --seed --seeder=CnpriSeeder --force" # Commande de migration et de seeding
-    autoDeploy: false # IMPORTANT: Ne pas exécuter automatiquement à chaque déploiement pour éviter de réinitialiser la DB
+    runtime: docker
+    repo: https://github.com/tresorkabis/sale.git
+    plan: free
+    buildCommand: "composer install && npm install && npm run build"
+    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
+    healthCheckPath: /
     envVars:
       - key: APP_ENV
         value: production
@@ -74,3 +33,43 @@ services:
         fromDatabase:
           name: ecnpri-db
           property: password
+
+  # Worker pour migrations/seeders
+  - type: worker
+    name: ecnpri-migrate-seed
+    runtime: docker
+    plan: free
+    buildCommand: "composer install"
+    startCommand: "php artisan migrate:fresh --seed --seeder=CnpriSeeder --force"
+    autoDeploy: false
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: ecnpri-db
+          property: host
+      - key: DB_DATABASE
+        fromDatabase:
+          name: ecnpri-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: ecnpri-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ecnpri-db
+          property: password
+
+databases:
+  - name: ecnpri-db
+    databaseName: ecnpri_db
+    user: ecnpri_user
+    plan: free
