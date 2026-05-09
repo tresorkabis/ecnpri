@@ -33,10 +33,6 @@ ENV COMPOSER_MEMORY_LIMIT=-1
 # Install Composer dependencies with verbose output
 RUN composer install --no-dev --optimize-autoloader -vvv
 
-# Generate application key (if not already set in .env)
-# This is usually handled by Render's env vars, but good to have as fallback
-RUN php artisan key:generate --force
-
 # Run npm install and build for frontend assets
 # Ensure Node.js is available if you have frontend assets
 # For this, we'll add Node.js to the image, or use a multi-stage build
