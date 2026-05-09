@@ -30,8 +30,8 @@ COPY . .
 # Increase Composer memory limit
 ENV COMPOSER_MEMORY_LIMIT=-1
 
-# Install Composer dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install Composer dependencies with verbose output
+RUN composer install --no-dev --optimize-autoloader -vvv
 
 # Generate application key (if not already set in .env)
 # This is usually handled by Render's env vars, but good to have as fallback
