@@ -27,6 +27,13 @@ WORKDIR /var/www/html
 # Copy application code
 COPY . .
 
+# Create SQLite database file and set permissions for storage
+RUN touch database/database.sqlite && \
+    chmod 664 database/database.sqlite && \
+    chown www-data:www-data database/database.sqlite && \
+    chown -R www-data:www-data storage bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache
+
 # Increase Composer memory limit
 ENV COMPOSER_MEMORY_LIMIT=-1
 

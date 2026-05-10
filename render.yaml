@@ -14,16 +14,16 @@ services:
       - key: APP_KEY
         generateValue: true # Render générera une clé d'application sécurisée
       - key: DB_CONNECTION
-        value: sqlite # CHANGED: Utilise SQLite
+        value: sqlite # Utilise SQLite
       - key: DB_DATABASE
-        value: /var/www/html/database/database.sqlite # CHANGED: Chemin vers la base de données SQLite
-      # DB_HOST, DB_USERNAME, DB_PASSWORD sont supprimés car non nécessaires pour SQLite
+        value: /var/www/html/database/database.sqlite # Chemin vers la base de données SQLite
 
-  # Job pour exécuter les migrations et les seeders (à lancer manuellement après le déploiement initial)
-  - type: job
+  # Worker pour exécuter les migrations et les seeders (à lancer manuellement après le déploiement initial)
+  - type: worker # CHANGED: Remplacé 'job' par 'worker'
     name: ecnpri-migrate-seed
     env: docker # Indique à Render d'utiliser le Dockerfile
-    plan: free # Plan gratuit pour le job
+    plan: free # Plan gratuit pour le worker
+    startCommand: "php artisan migrate:fresh --seed --seeder=CnpriSeeder --force" # Commande de migration et de seeding
     autoDeploy: false # IMPORTANT: Ne pas exécuter automatiquement à chaque déploiement pour éviter de réinitialiser la DB
     envVars:
       - key: APP_ENV
@@ -33,7 +33,6 @@ services:
       - key: APP_KEY
         generateValue: true
       - key: DB_CONNECTION
-        value: sqlite # CHANGED: Utilise SQLite
+        value: sqlite
       - key: DB_DATABASE
-        value: /var/www/html/database/database.sqlite # CHANGED: Chemin vers la base de données SQLite
-      # DB_HOST, DB_USERNAME, DB_PASSWORD sont supprimés car non nécessaires pour SQLite
+        value: /var/www/html/database/database.sqlite
