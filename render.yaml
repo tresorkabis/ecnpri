@@ -1,10 +1,30 @@
+# render.yaml
 services:
+  # Service pour l'application web Laravel
   - type: web
     name: ecnpri-app
-    runtime: docker
-    repo: https://github.com/tresorkabis/ecnpri.git
-    plan: free
-    healthCheckPath: /
+    env: docker # Indique à Render d'utiliser le Dockerfile
+    plan: free # Plan gratuit pour la démo
+    healthCheckPath: / # Chemin pour vérifier la santé de l'application
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true # Render générera une clé d'application sécurisée
+      - key: DB_CONNECTION
+        value: sqlite # CHANGED: Utilise SQLite
+      - key: DB_DATABASE
+        value: /var/www/html/database/database.sqlite # CHANGED: Chemin vers la base de données SQLite
+      # DB_HOST, DB_USERNAME, DB_PASSWORD sont supprimés car non nécessaires pour SQLite
+
+  # Job pour exécuter les migrations et les seeders (à lancer manuellement après le déploiement initial)
+  - type: job
+    name: ecnpri-migrate-seed
+    env: docker # Indique à Render d'utiliser le Dockerfile
+    plan: free # Plan gratuit pour le job
+    autoDeploy: false # IMPORTANT: Ne pas exécuter automatiquement à chaque déploiement pour éviter de réinitialiser la DB
     envVars:
       - key: APP_ENV
         value: production
@@ -13,26 +33,7 @@ services:
       - key: APP_KEY
         generateValue: true
       - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_HOST
-        fromDatabase:
-          name: ecnpri-db
-          property: host
+        value: sqlite # CHANGED: Utilise SQLite
       - key: DB_DATABASE
-        fromDatabase:
-          name: ecnpri-db
-          property: database
-      - key: DB_USERNAME
-        fromDatabase:
-          name: ecnpri-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: ecnpri-db
-          property: password
-
-databases:
-  - name: ecnpri-db
-    databaseName: ecnpri_db
-    user: ecnpri_user
-    plan: free
+        value: /var/www/html/database/database.sqlite # CHANGED: Chemin vers la base de données SQLite
+      # DB_HOST, DB_USERNAME, DB_PASSWORD sont supprimés car non nécessaires pour SQLite
