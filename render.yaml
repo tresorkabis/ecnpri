@@ -1,7 +1,7 @@
 services:
   - type: web
     name: ecnpri-app
-    env: docker # Render utilisera ton Dockerfile
+    runtime: docker   # ou env: docker
     plan: free
     healthCheckPath: /
     envVars:
@@ -15,5 +15,3 @@ services:
         value: sqlite
       - key: DB_DATABASE
         value: /var/www/html/database/database.sqlite
-    # ⚠️ Ici on lance migrations + seeders avant de démarrer l'app
-    startCommand: php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=$PORT
