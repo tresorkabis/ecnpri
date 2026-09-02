@@ -138,6 +138,9 @@
                 <div class="font-semibold text-gray-600">Objet de la mission :</div>
                 <div class="text-gray-900 font-medium">{{ $inspection->purpose ?? 'Inspection de routine' }}</div>
 
+                <div class="font-semibold text-gray-600">Autorisation :</div>
+                <div class="text-gray-900">Mission autorisée par <span class="font-bold uppercase">{{ $inspection->authorized_by ?? config('cnpri.authorization_authority') }}</span></div>
+
                 <div class="font-semibold text-gray-600">Période :</div>
                 <div class="text-gray-900">Du {{ $inspection->start_date->format('d/m/Y') }} au {{ $inspection->end_date->format('d/m/Y') }} ({{ $inspection->duration }} jours)</div>
             </div>

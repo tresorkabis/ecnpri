@@ -71,7 +71,7 @@
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="authorized_by">
                         Autorisée par
                     </label>
-                    <input type="text" name="authorized_by" id="authorized_by" value="{{ $inspection->authorized_by }}" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ex: Le Secrétaire Général">
+                    <input type="text" name="authorized_by" id="authorized_by" value="{{ $inspection->authorized_by ?? config('cnpri.authorization_authority') }}" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="{{ config('cnpri.authorization_authority') }}">
                 </div>
 
                 <div class="mb-6">

@@ -11,6 +11,29 @@
             </a>
         </div>
 
+        {{-- Formulaire de recherche --}}
+        <form method="GET" class="mb-4 flex items-end gap-2">
+            <div>
+                <label for="recherche" class="block text-sm font-medium text-gray-700 mb-1">Rechercher</label>
+                <input
+                    type="text"
+                    name="recherche"
+                    id="recherche"
+                    value="{{ request('recherche') }}"
+                    placeholder="Nom, ville, province..."
+                    class="border border-gray-300 rounded px-3 py-2 text-sm w-64"
+                />
+            </div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">
+                Filtrer
+            </button>
+            @if(request('recherche'))
+                <a href="/establishments" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded text-sm">
+                    Effacer
+                </a>
+            @endif
+        </form>
+
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">

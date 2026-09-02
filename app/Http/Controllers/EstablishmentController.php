@@ -12,13 +12,25 @@ class EstablishmentController extends Controller
      */
     public function index()
     {
-        $establishments = Establishment::orderBy('name')->get();
+        $recherche = request('recherche');
+
+        $query = Establishment::orderBy('name');
+
+        if ($recherche) {
+            $query->where(function ($q) use ($recherche) {
+                $q->where('name', 'LIKE', '%' . $recherche . '%')
+                  ->orWhere('city', 'LIKE', '%' . $recherche . '%')
+                  ->orWhere('province', 'LIKE', '%' . $recherche . '%');
+            });
+        }
+
+        $establishments = $query->get();
 
         if (request()->wantsJson()) {
             return response()->json($establishments);
         }
 
-        return view('establishments.index', compact('establishments'));
+        return view('establishments.index', compact('establishments', 'recherche'));
     }
 
     /**
