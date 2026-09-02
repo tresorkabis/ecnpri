@@ -7,7 +7,16 @@ echo "======================================================"
 echo "   CNPRI - LANCEMENT DE L'APPLICATION"
 echo "======================================================"
 echo ""
-echo "Démarrage du serveur sur http://127.0.0.1:8000 ..."
+echo "Mise a jour du code depuis GitHub (git pull)..."
+if git pull; then
+    echo "Code a jour."
+else
+    echo "ATTENTION : echec du git pull (pas de connexion, conflits ?)."
+    echo "L'application demarre quand meme avec la version locale."
+fi
+echo ""
+
+echo "Demarrage du serveur sur http://127.0.0.1:8000 ..."
 echo "Pour arrêter l'application, appuyez sur [Ctrl + C]"
 echo ""
 
