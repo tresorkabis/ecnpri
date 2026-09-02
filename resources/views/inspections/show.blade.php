@@ -81,7 +81,7 @@
             <div class="flex flex-col items-center mb-12">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo CNPRI" class="w-32 h-32 mb-4">
                 <h2 class="text-xl font-bold uppercase tracking-widest">République Démocratique du Congo</h2>
-                <p class="text-sm italic mb-2">Ministère de la Recherche Scientifique et Innovation Technologique</p>
+                <p class="text-sm italic mb-2">{{ config('cnpri.ministry') }}</p>
                 <div class="w-24 border-b-2 border-blue-900 mb-2"></div>
                 <h1 class="text-3xl font-black text-blue-900">C.N.P.R.I</h1>
                 <p class="text-xs font-bold uppercase tracking-widest">Comité National de Protection contre les Rayonnements Ionisants</p>

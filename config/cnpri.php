@@ -22,4 +22,11 @@ return [
     | Autorité qui autorise les inspections du CNPRI (champ "Autorisée par").
     */
     'authorization_authority' => env('CNPRI_AUTHORIZATION_AUTHORITY', 'Le Président du CNPRI'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ministère de tutelle (en-tête des rapports d'inspection)
+    |--------------------------------------------------------------------------
+    */
+    'ministry' => env('CNPRI_MINISTRY', "Ministère de l'Enseignement Supérieur, Universitaire, Recherche Scientifique et Innovations"),
 ];
