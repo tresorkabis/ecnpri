@@ -6,6 +6,23 @@
     <div class="container mx-auto px-4 py-8 max-w-2xl">
         <h1 class="text-3xl font-semibold mb-6 text-gray-800">Programmer une Nouvelle Mission</h1>
 
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded mb-6">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-6">
+                <p class="font-bold mb-2">Veuillez corriger les erreurs suivantes :</p>
+                <ul class="list-disc list-inside text-sm">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="bg-white rounded-lg shadow-md p-8">
             <form action="/inspections" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -17,7 +34,7 @@
                     <select name="establishment_id" id="establishment_id" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                         <option value="">Sélectionner un établissement</option>
                         @foreach($establishments as $est)
-                        <option value="{{ $est->id }}">{{ $est->name }} ({{ $est->city }})</option>
+                        <option value="{{ $est->id }}" {{ old('establishment_id') == $est->id ? 'selected' : '' }}>{{ $est->name }} ({{ $est->city }})</option>
                         @endforeach
                     </select>
                 </div>
@@ -26,7 +43,7 @@
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="purpose">
                         Objet de la mission
                     </label>
-                    <input type="text" name="purpose" id="purpose" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ex: Inspection de radioprotection">
+                    <input type="text" name="purpose" id="purpose" value="{{ old('purpose') }}" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ex: Inspection de radioprotection">
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -34,13 +51,13 @@
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="start_date">
                             Date de début
                         </label>
-                        <input type="date" name="start_date" id="start_date" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
                     <div>
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="end_date">
                             Date de fin
                         </label>
-                        <input type="date" name="end_date" id="end_date" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
                 </div>
 
@@ -49,9 +66,9 @@
                         Type d'inspection
                     </label>
                     <select name="type" id="type" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="réglementaire">Réglementaire</option>
-                        <option value="inopiné">Inopiné</option>
-                        <option value="investigation">Investigation</option>
+                        <option value="réglementaire" {{ old('type') == 'réglementaire' ? 'selected' : '' }}>Réglementaire</option>
+                        <option value="inopiné" {{ old('type') == 'inopiné' ? 'selected' : '' }}>Inopiné</option>
+                        <option value="investigation" {{ old('type') == 'investigation' ? 'selected' : '' }}>Investigation</option>
                     </select>
                 </div>
 
@@ -59,7 +76,7 @@
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="authorized_by">
                         Autorisée par
                     </label>
-                    <input type="text" name="authorized_by" id="authorized_by" value="{{ config('cnpri.authorization_authority') }}" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <input type="text" name="authorized_by" id="authorized_by" value="{{ old('authorized_by', config('cnpri.authorization_authority')) }}" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     <p class="text-xs text-gray-500 mt-1">Par défaut : {{ config('cnpri.authorization_authority') }}.</p>
                 </div>
 

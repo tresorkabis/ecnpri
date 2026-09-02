@@ -71,6 +71,19 @@ Deux options :
 
 Le changement s'applique à la fois à la page **Programme** et au document Word exporté.
 
+**Autorisation des inspections**
+
+Les inspections sont **autorisées par Le Président du CNPRI** par défaut :
+- Le champ « Autorisée par » des formulaires de programmation/modification est pré-rempli avec cette valeur.
+- Si le champ est laissé vide, le contrôleur applique automatiquement l'autorité par défaut.
+- Le rapport d'inspection (`/inspections/{id}`) affiche la ligne « Autorisation : Mission autorisée par … ».
+
+Pour personnaliser l'autorité d'autorisation, dans `config/cnpri.php` :
+```php
+'authorization_authority' => env('CNPRI_AUTHORIZATION_AUTHORITY', 'Le Président du CNPRI'),
+```
+(ou ajouter `CNPRI_AUTHORIZATION_AUTHORITY="..."` dans le fichier `.env`, puis `php artisan config:clear`).
+
 #### Identifiants de test (Seeder)
 - **Utilisateur Admin** : admin@cnpri.cd / password
 - **Exemples d'établissements** : Clinique Ngaliema, Tenke Fungurume Mining.

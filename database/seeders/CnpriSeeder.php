@@ -289,7 +289,7 @@ class CnpriSeeder extends Seeder
             'type' => 'réglementaire',
             'purpose' => 'Inspection réglementaire de radioprotection et de sûreté des sources de rayonnements ionisants.',
             'status' => 'Effectuée',
-            'authorized_by' => 'Le Secrétaire Général à la Recherche Scientifique',
+            'authorized_by' => 'Le Président du CNPRI',
             'summary' => 'La mission avait pour but de s’assurer de la conformité des installations de PPC Barnet aux normes de radioprotection.',
             'methodology' => "1. Séance d'ouverture avec la direction.\n2. Contrôle documentaire (Inventaire, Registres).\n3. Mesures de débit de dose sur site.\n4. Vérification de la signalisation et du balisage.",
             'conclusion' => 'L\'établissement dispose d\'une infrastructure solide, mais des améliorations sont nécessaires concernant le suivi dosimétrique du personnel.',
@@ -325,7 +325,7 @@ class CnpriSeeder extends Seeder
             'end_date' => now()->subDays(10)->toDateString(),
             'type' => 'réglementaire',
             'status' => 'Effectuée',
-            'authorized_by' => 'Le Responsable de Division Radioprotection',
+            'authorized_by' => 'Le Président du CNPRI',
             'summary' => 'Inspection annuelle de radioprotection.',
         ]);
 
@@ -338,7 +338,7 @@ class CnpriSeeder extends Seeder
             'end_date' => now()->addDays(21)->toDateString(),
             'type' => 'inopiné',
             'status' => 'Approuvée',
-            'authorized_by' => 'Le Directeur du CNPRI',
+            'authorized_by' => 'Le Président du CNPRI',
             'summary' => 'Vérification surprise de la gestion des sources scellées.',
         ]);
 
@@ -365,7 +365,7 @@ class CnpriSeeder extends Seeder
             'type' => 'réglementaire',
             'purpose' => 'Inspection réglementaire de radioprotection et de sûreté des installations pétrolières de PERENCO.',
             'status' => 'En cours',
-            'authorized_by' => 'Le Directeur du CNPRI',
+            'authorized_by' => 'Le Président du CNPRI',
             'summary' => 'Contrôle périodique des sources radioactives utilisées dans les activités de forage et de diagraphie.',
         ]);
 

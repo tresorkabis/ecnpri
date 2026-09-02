@@ -57,7 +57,57 @@ class InspectionApiTest extends TestCase
         $this->assertDatabaseHas('inspections', [
             'start_date' => '2026-07-01 00:00:00',
             'end_date' => '2026-07-02 00:00:00',
-            'status' => 'Brouillon'
+            'status' => 'Brouillon',
+        ]);
+    }
+
+    /**
+     * Test : les inspections sont autorisées par Le Président du CNPRI par défaut.
+     */
+    public function test_inspection_is_authorized_by_president_by_default(): void
+    {
+        $this->seed(\Database\Seeders\CnpriSeeder::class);
+
+        $data = [
+            'establishment_id' => 1,
+            'start_date' => '2026-09-01',
+            'end_date' => '2026-09-02',
+            'type' => 'investigation',
+            'inspectors' => [1],
+            // authorized_by volontairement omis
+        ];
+
+        $response = $this->post('/inspections', $data, ['Accept' => 'application/json']);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('inspections', [
+            'status' => 'Brouillon',
+            'authorized_by' => 'Le Président du CNPRI',
+        ]);
+    }
+
+    /**
+     * Test : l'autorité d'autorisation peut être personnalisée.
+     */
+    public function test_inspection_can_have_custom_authority(): void
+    {
+        $this->seed(\Database\Seeders\CnpriSeeder::class);
+
+        $data = [
+            'establishment_id' => 1,
+            'start_date' => '2026-09-10',
+            'end_date' => '2026-09-11',
+            'type' => 'réglementaire',
+            'inspectors' => [1],
+            'authorized_by' => 'Le Vice-Président du CNPRI',
+        ];
+
+        $response = $this->post('/inspections', $data, ['Accept' => 'application/json']);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('inspections', [
+            'status' => 'Brouillon',
+            'authorized_by' => 'Le Vice-Président du CNPRI',
         ]);
     }
 

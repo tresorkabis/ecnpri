@@ -149,7 +149,7 @@ class ProgrammeInspectionsSeeder extends Seeder
                     'end_date' => $mission['date'],
                     'type' => $type,
                     'status' => 'Brouillon',
-                    'authorized_by' => 'Le Directeur du CNPRI',
+                    'authorized_by' => 'Le Président du CNPRI',
                     'purpose' => ucfirst($type) . ' programmée dans le cadre du programme semestriel des inspections.',
                 ]
             );
