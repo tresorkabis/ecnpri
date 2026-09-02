@@ -32,9 +32,9 @@
 
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="employee_id">
-                        Matricule / ID Employé *
+                        Matricule / ID Employé (facultatif)
                     </label>
-                    <input type="text" name="employee_id" id="employee_id" required value="{{ old('employee_id') }}" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ex: INS-2024-001">
+                    <input type="text" name="employee_id" id="employee_id" value="{{ old('employee_id') }}" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ex: INS-2024-001">
                     @error('employee_id')
                         <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
                     @enderror

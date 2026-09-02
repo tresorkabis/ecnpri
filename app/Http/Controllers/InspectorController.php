@@ -12,13 +12,21 @@ class InspectorController extends Controller
      */
     public function index()
     {
-        $inspectors = Inspector::latest()->get();
+        $recherche = request('recherche');
+
+        $query = Inspector::latest();
+
+        if ($recherche) {
+            $query->where('name', 'LIKE', '%' . $recherche . '%');
+        }
+
+        $inspectors = $query->get();
 
         if (request()->wantsJson()) {
             return response()->json($inspectors);
         }
 
-        return view('inspectors.index', compact('inspectors'));
+        return view('inspectors.index', compact('inspectors', 'recherche'));
     }
 
     /**
@@ -37,7 +45,7 @@ class InspectorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'grade' => 'nullable|string|max:255',
-            'employee_id' => 'required|string|unique:inspectors,employee_id',
+            'employee_id' => 'nullable|string|unique:inspectors,employee_id',
             'specialization' => 'nullable|string|max:255',
         ]);
 
@@ -86,7 +94,7 @@ class InspectorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'grade' => 'nullable|string|max:255',
-            'employee_id' => 'required|string|unique:inspectors,employee_id,' . $inspector->id,
+            'employee_id' => 'nullable|string|unique:inspectors,employee_id,' . $inspector->id,
             'specialization' => 'nullable|string|max:255',
         ]);
 

@@ -11,6 +11,26 @@
             </a>
         </div>
 
+        {{-- Formulaire de recherche --}}
+        <form method="GET" class="flex gap-2 mb-4">
+            <input
+                type="text"
+                name="recherche"
+                placeholder="Rechercher un inspecteur..."
+                value="{{ request('recherche') }}"
+                class="border border-gray-300 px-3 py-1 rounded text-sm w-64"
+            />
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                Filtrer
+            </button>
+            @if(request('recherche'))
+                <a href="{{ route('inspectors.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-1 rounded text-sm">
+                    Effacer
+                </a>
+            @endif
+        </form>
+
+
 
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <table class="min-w-full leading-normal">
