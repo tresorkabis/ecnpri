@@ -22,8 +22,44 @@ class InspectionController extends Controller
             'inspecteur_id' => (string) $request->query('inspecteur_id', ''),
             'date_debut' => (string) $request->query('date_debut', ''),
             'date_fin' => (string) $request->query('date_fin', ''),
+            'tri' => in_array($request->query('tri', 'date'), ['date', 'etablissement', 'type', 'statut'], true)
+                ? (string) $request->query('tri')
+                : 'date',
+            'sens' => $request->query('sens', 'desc') === 'asc' ? 'asc' : 'desc',
         ];
 
+        $query = $this->buildIndexQuery($filters);
+
+        if ($request->wantsJson()) {
+            return response()->json($query->get());
+        }
+
+        $inspections = $query->paginate(15)->withQueryString();
+
+        $statuts = [
+            'prevues' => 'Prévues (Brouillon, Approuvée, En cours)',
+            'Brouillon' => 'Brouillon',
+            'Approuvée' => 'Approuvée',
+            'En cours' => 'En cours',
+            'Effectuée' => 'Effectuée',
+            'Annulée' => 'Annulée',
+        ];
+        $types = [
+            'réglementaire' => 'Réglementaire',
+            'investigation' => 'Investigation',
+            'inopiné' => 'Inopiné',
+        ];
+        $etablissements = Establishment::orderBy('name')->get();
+        $inspecteurs = Inspector::orderBy('name')->get();
+
+        return view('inspections.index', compact('inspections', 'filters', 'statuts', 'types', 'etablissements', 'inspecteurs'));
+    }
+
+    /**
+     * Construit la requête des inspections avec les filtres et le tri.
+     */
+    protected function buildIndexQuery(array $filters): \Illuminate\Database\Eloquent\Builder
+    {
         $query = Inspection::with(['establishment', 'inspectors']);
 
         // Recherche libre : nom de l'établissement ou objet de la mission
@@ -64,29 +100,30 @@ class InspectionController extends Controller
             $query->where('start_date', '<=', $filters['date_fin']);
         }
 
-        $inspections = $query->orderBy('start_date', 'desc')->get();
+        // Tri (whitelist de colonnes pour éviter toute injection SQL)
+        $sens = $filters['sens'];
 
-        if ($request->wantsJson()) {
-            return response()->json($inspections);
+        if ($filters['tri'] === 'etablissement') {
+            $query->leftJoin('establishments', 'establishments.id', '=', 'inspections.establishment_id')
+                ->select('inspections.*')
+                ->orderBy('establishments.name', $sens)
+                ->orderBy('inspections.start_date', $sens);
+        } else {
+            $colonnes = [
+                'date' => 'inspections.start_date',
+                'type' => 'inspections.type',
+                'statut' => 'inspections.status',
+            ];
+            $colonne = $colonnes[$filters['tri']] ?? 'inspections.start_date';
+            $query->orderBy($colonne, $sens);
+
+            // Tri secondaire de stabilité (toujours par date)
+            if ($colonne !== 'inspections.start_date') {
+                $query->orderBy('inspections.start_date', 'desc');
+            }
         }
 
-        $statuts = [
-            'prevues' => 'Prévues (Brouillon, Approuvée, En cours)',
-            'Brouillon' => 'Brouillon',
-            'Approuvée' => 'Approuvée',
-            'En cours' => 'En cours',
-            'Effectuée' => 'Effectuée',
-            'Annulée' => 'Annulée',
-        ];
-        $types = [
-            'réglementaire' => 'Réglementaire',
-            'investigation' => 'Investigation',
-            'inopiné' => 'Inopiné',
-        ];
-        $etablissements = Establishment::orderBy('name')->get();
-        $inspecteurs = Inspector::orderBy('name')->get();
-
-        return view('inspections.index', compact('inspections', 'filters', 'statuts', 'types', 'etablissements', 'inspecteurs'));
+        return $query;
     }
 
     /**

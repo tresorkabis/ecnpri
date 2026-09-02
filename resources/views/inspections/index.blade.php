@@ -2,6 +2,21 @@
 
 @section('title', 'Planning des Inspections - CNPRI')
 
+@php
+    // Paramètres de tri issus de l'URL (sans tri/sens/page pour pouvoir basculer)
+    $triQuery = collect(request()->query())->except(['tri', 'sens', 'page'])->all();
+    $triUrl = function (string $col) use ($filters, $triQuery) {
+        $sens = ($filters['tri'] === $col && $filters['sens'] === 'asc') ? 'desc' : 'asc';
+        return route('inspections.index', array_merge($triQuery, ['tri' => $col, 'sens' => $sens]));
+    };
+    $triArrow = function (string $col) use ($filters) {
+        if ($filters['tri'] === $col) {
+            return $filters['sens'] === 'asc' ? '▲' : '▼';
+        }
+        return '↕';
+    };
+@endphp
+
 @section('content')
     <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
@@ -84,10 +99,15 @@
                         Effacer
                     </a>
                 </div>
+                <input type="hidden" name="tri" value="{{ $filters['tri'] }}">
+                <input type="hidden" name="sens" value="{{ $filters['sens'] }}">
             </form>
             <p class="text-xs text-gray-500 mt-3">
-                {{ $inspections->count() }} inspection(s) affichée(s)
-                @if(collect($filters)->filter()->isNotEmpty())
+                {{ $inspections->total() }} inspection(s)
+                @if($inspections->hasPages())
+                    <span class="text-gray-400">— page {{ $inspections->currentPage() }}/{{ $inspections->lastPage() }}, affichage {{ $inspections->firstItem() ?? 0 }}–{{ $inspections->lastItem() ?? 0 }}</span>
+                @endif
+                @if(collect($filters)->except(['tri', 'sens'])->filter()->isNotEmpty())
                     <span class="text-blue-600">— filtres actifs</span>
                 @endif
             </p>
@@ -97,11 +117,27 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Établissement</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="{{ $triUrl('date') }}" class="inline-flex items-center gap-1 hover:text-blue-700 transition">
+                                Date <span class="text-gray-400">{{ $triArrow('date') }}</span>
+                            </a>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="{{ $triUrl('etablissement') }}" class="inline-flex items-center gap-1 hover:text-blue-700 transition">
+                                Établissement <span class="text-gray-400">{{ $triArrow('etablissement') }}</span>
+                            </a>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="{{ $triUrl('type') }}" class="inline-flex items-center gap-1 hover:text-blue-700 transition">
+                                Type <span class="text-gray-400">{{ $triArrow('type') }}</span>
+                            </a>
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inspecteurs</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="{{ $triUrl('statut') }}" class="inline-flex items-center gap-1 hover:text-blue-700 transition">
+                                Statut <span class="text-gray-400">{{ $triArrow('statut') }}</span>
+                            </a>
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rapport</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -172,5 +208,11 @@
                 </tbody>
             </table>
         </div>
+
+        @if($inspections->hasPages())
+            <div class="mt-6 flex justify-end">
+                {{ $inspections->links() }}
+            </div>
+        @endif
     </div>
 @endsection

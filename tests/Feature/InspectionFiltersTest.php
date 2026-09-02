@@ -137,4 +137,79 @@ class InspectionFiltersTest extends TestCase
         $response = $this->getJson('/inspections?etablissement_id=' . $this->braccongo->id . '&statut=' . urlencode('En cours'));
         $response->assertOk()->assertJsonCount(1);
     }
+
+    public function test_sort_by_date_asc(): void
+    {
+        $response = $this->getJson('/inspections?tri=date&sens=asc');
+        $response->assertOk();
+        $data = $response->json();
+
+        // La mission la plus ancienne est l'inopiné du 2026-08-10 (BRACONGO)
+        $this->assertSame('inopiné', $data[0]['type']);
+        $this->assertEquals('2026-08-10', substr($data[0]['start_date'], 0, 10));
+    }
+
+    public function test_sort_by_establishment_desc(): void
+    {
+        $response = $this->getJson('/inspections?tri=etablissement&sens=desc');
+        $response->assertOk();
+        $data = $response->json();
+
+        // Ordre décroissant des noms : PERENCO REP > BRACONGO
+        $this->assertSame('PERENCO REP', $data[0]['establishment']['name']);
+    }
+
+    public function test_page_displays_sort_links(): void
+    {
+        $response = $this->get('/inspections');
+
+        $response->assertOk();
+        $response->assertSee('tri=date', false);
+        $response->assertSee('tri=etablissement', false);
+        $response->assertSee('tri=type', false);
+        $response->assertSee('tri=statut', false);
+    }
+
+    public function test_pagination_splits_results_and_is_preserved_with_filters(): void
+    {
+        // Établissement "récent" : 15 missions récentes (remplissent la première page)
+        $recent = Establishment::create([
+            'name' => 'ETAB RECENT',
+            'province' => 'Kinshasa',
+            'city' => 'Kinshasa',
+            'category' => 'Autre',
+        ]);
+        for ($i = 1; $i <= 15; $i++) {
+            $this->inspection($recent, 'réglementaire', '2026-11-' . str_pad((string) $i, 2, '0', STR_PAD_LEFT), 'Brouillon', 'Mission récente ' . $i);
+        }
+
+        // Établissement "ancien" : 1 mission 2026. Ce sera la dernière => page 2
+        $ancien = Establishment::create([
+            'name' => 'ETAB ANCIEN',
+            'province' => 'Kinshasa',
+            'city' => 'Kinshasa',
+            'category' => 'Autre',
+        ]);
+        $this->inspection($ancien, 'investigation', '2026-05-01', 'Effectuée', 'Mission ancienne');
+
+        $page1 = $this->get('/inspections');
+        $page1->assertOk();
+        $page1->assertSee('ETAB RECENT');
+        $page1->assertSee('page=2', false);
+
+        // "ETAB ANCIEN" n'apparaît que dans le menu du filtre (1 occurrence), pas dans le tableau
+        // "ETAB RECENT" apparaît 16 fois : 15 lignes + 1 option du filtre
+        $htmlPage1 = $page1->getContent();
+        $this->assertSame(1, substr_count($htmlPage1, 'ETAB ANCIEN'));
+        $this->assertSame(16, substr_count($htmlPage1, 'ETAB RECENT'));
+
+        $page2 = $this->get('/inspections?page=2');
+        $page2->assertOk();
+        $page2->assertSee('ETAB ANCIEN');
+
+        // Page 2 : ETAB ANCIEN en ligne + option du filtre, ETAB RECENT uniquement dans le filtre
+        $htmlPage2 = $page2->getContent();
+        $this->assertSame(2, substr_count($htmlPage2, 'ETAB ANCIEN'));
+        $this->assertSame(1, substr_count($htmlPage2, 'ETAB RECENT'));
+    }
 }

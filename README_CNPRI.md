@@ -34,6 +34,10 @@ La page **Inspections** (`/inspections`) offre un bandeau de filtres (méthode G
 
 Les filtres sont combinables et la réponse JSON (`Accept: application/json`) applique les mêmes conditions.
 
+#### Tri et pagination de la liste des inspections
+- **Tri par colonne** : cliquer sur les en-têtes **Date**, **Établissement**, **Type** ou **Statut** (▼ = tri actif, cliquez pour inverser). Paramètres `tri` (`date`, `etablissement`, `type`, `statut`) et `sens` (`asc`, `desc`). Ex. : `?tri=etablissement&sens=asc`.
+- **Pagination** : 15 missions par page (`?page=2`), les filtres et le tri sont conservés d'une page à l'autre (`withQueryString`).
+
 #### Programme des inspections (export Word)
 La page **Programme** (`/inspections/programme`) présente le programme semestriel des inspections regroupé par type (`Réglementaire`, `Investigation`) puis par zone de tournée (Kinshasa, Kongo-Central, autres provinces), avec les colonnes : N°, Date, Installation, Localisation et Inspecteurs — au format du document `PROPOSITION DU PROGRAMME DES INSPECTIONS DU ... SEMESTRE ... .docx`.
 
