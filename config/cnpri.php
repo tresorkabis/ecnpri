@@ -29,4 +29,41 @@ return [
     |--------------------------------------------------------------------------
     */
     'ministry' => env('CNPRI_MINISTRY', "Ministère de l'Enseignement Supérieur, Universitaire, Recherche Scientifique et Innovations"),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Provinces de la République Démocratique du Congo (26)
+    |--------------------------------------------------------------------------
+    | Liste officielle des provinces et de leurs chefs-lieux, utilisée pour
+    | les listes déroulantes des établissements et les regroupements
+    | géographiques (zones de tournée) du programme des inspections.
+    */
+    'provinces' => [
+        'Bas-Uele' => 'Buta',
+        'Équateur' => 'Mbandaka',
+        'Haut-Katanga' => 'Lubumbashi',
+        'Haut-Lomami' => 'Kamina',
+        'Haut-Uele' => 'Isiro',
+        'Ituri' => 'Bunia',
+        'Kasaï' => 'Tshikapa',
+        'Kasaï central' => 'Kananga',
+        'Kasaï oriental' => 'Mbujimayi',
+        'Kinshasa' => 'Kinshasa',
+        'Kongo-Central' => 'Matadi',
+        'Kwango' => 'Kenge',
+        'Kwilu' => 'Bandundu',
+        'Lomami' => 'Kabinda',
+        'Lualaba' => 'Kolwezi',
+        'Mai-Ndombe' => 'Inongo',
+        'Maniema' => 'Kindu',
+        'Mongala' => 'Lisala',
+        'Nord-Kivu' => 'Goma',
+        'Nord-Ubangi' => 'Gbadolite',
+        'Sankuru' => 'Lusambo',
+        'Sud-Kivu' => 'Bukavu',
+        'Sud-Ubangi' => 'Gemena',
+        'Tanganyika' => 'Kalemie',
+        'Tshopo' => 'Kisangani',
+        'Tshuapa' => 'Boende',
+    ],
 ];

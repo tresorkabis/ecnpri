@@ -94,4 +94,33 @@ class EstablishmentTest extends TestCase
         $response->assertSee('Recherche');
         $response->assertSee('Sources');
     }
+
+    public function test_create_form_shows_all_26_provinces(): void
+    {
+        $response = $this->get('/establishments/create');
+
+        $response->assertStatus(200);
+        $response->assertSee('Sélectionner une province', false);
+
+        foreach (array_keys(config('cnpri.provinces')) as $province) {
+            $response->assertSee($province);
+        }
+
+        // Chef-lieu d'une province, pour vérifier le format "Province (Chef-lieu)"
+        $response->assertSee('Mbandaka');
+    }
+
+    public function test_edit_form_keeps_existing_province_value(): void
+    {
+        $establishment = Establishment::create([
+            'name' => 'Établissement Province',
+            'province' => 'Nord-Kivu',
+            'city' => 'Goma',
+        ]);
+
+        $response = $this->get("/establishments/{$establishment->id}/edit");
+
+        $response->assertStatus(200);
+        $response->assertSee('<option value="Nord-Kivu" selected', false);
+    }
 }

@@ -36,7 +36,16 @@
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="province">
                             Province
                         </label>
-                        <input type="text" name="province" id="province" value="{{ $establishment->province }}" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ex: Kinshasa">
+                        <select name="province" id="province" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="">Sélectionner une province</option>
+                            @php $currentProvince = old('province', $establishment->province); @endphp
+                            @if($currentProvince && !array_key_exists($currentProvince, config('cnpri.provinces')))
+                            <option value="{{ $currentProvince }}" selected>{{ $currentProvince }}</option>
+                            @endif
+                            @foreach(config('cnpri.provinces') as $province => $chefLieu)
+                            <option value="{{ $province }}" {{ $currentProvince == $province ? 'selected' : '' }}>{{ $province }} ({{ $chefLieu }})</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div>
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="city">
