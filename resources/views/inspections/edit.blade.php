@@ -63,6 +63,7 @@
                     <select name="type" id="type" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                         <option value="réglementaire" {{ $inspection->type == 'réglementaire' ? 'selected' : '' }}>Réglementaire</option>
                         <option value="inopiné" {{ $inspection->type == 'inopiné' ? 'selected' : '' }}>Inopiné</option>
+                        <option value="investigation" {{ $inspection->type == 'investigation' ? 'selected' : '' }}>Investigation</option>
                     </select>
                 </div>
 

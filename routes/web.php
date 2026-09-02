@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EstablishmentController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\InspectionProgramController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\RadioactiveSourceController;
 use App\Http\Controllers\UsageAuthorizationController;
@@ -14,6 +15,11 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+// Programme des inspections : déclaré AVANT le resource afin d'éviter
+// que "programme" soit interprété comme l'identifiant {inspection}.
+Route::get('/inspections/programme', [InspectionProgramController::class, 'index'])->name('inspections.programme');
+Route::get('/inspections/programme/export', [InspectionProgramController::class, 'export'])->name('inspections.programme.export');
 
 Route::resource('establishments', EstablishmentController::class);
 Route::resource('inspections', InspectionController::class);

@@ -31,7 +31,8 @@
                 <a href="/equipment" class="text-white hover:text-blue-200 py-1 border-b-2 {{ Request::is('equipment*') ? 'border-white' : 'border-transparent' }}">Équipements</a>
                 <a href="/radioactive-sources" class="text-white hover:text-blue-200 py-1 border-b-2 {{ Request::is('radioactive-sources*') ? 'border-white' : 'border-transparent' }}">Sources</a>
                 <a href="/inspectors" class="text-white hover:text-blue-200 py-1 border-b-2 {{ Request::is('inspectors*') ? 'border-white' : 'border-transparent' }}">Inspecteurs</a>
-                <a href="/inspections" class="text-white hover:text-blue-200 py-1 border-b-2 {{ Request::is('inspections*') ? 'border-white' : 'border-transparent' }}">Inspections</a>
+                <a href="/inspections/programme" class="text-white hover:text-blue-200 py-1 border-b-2 {{ Request::is('inspections/programme*') ? 'border-white' : 'border-transparent' }}">Programme</a>
+                <a href="/inspections" class="text-white hover:text-blue-200 py-1 border-b-2 {{ Request::is('inspections*') && !Request::is('inspections/programme*') ? 'border-white' : 'border-transparent' }}">Inspections</a>
             </div>
         </div>
     </nav>

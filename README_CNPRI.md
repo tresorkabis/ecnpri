@@ -20,6 +20,31 @@ Cette application Laravel a été générée pour répondre aux besoins de gesti
    - `GET /inspections` : Liste des inspections.
    - `GET /inspections/{id}` : Détails d'une inspection avec les inspecteurs et les constats.
 
+#### Filtres de la liste des inspections
+La page **Inspections** (`/inspections`) offre un bandeau de filtres (méthode GET) :
+
+| Paramètre | Description | Exemple |
+|---|---|---|
+| `recherche` | Texte libre sur le nom de l'établissement ou l'objet de la mission | `?recherche=PERENCO` |
+| `statut` | `Brouillon`, `Approuvée`, `En cours`, `Effectuée`, `Annulée` ou `prevues` (Brouillon + Approuvée + En cours) | `?statut=prevues` |
+| `type` | `réglementaire`, `investigation`, `inopiné` | `?type=investigation` |
+| `etablissement_id` | Identifiant d'un établissement | `?etablissement_id=1` |
+| `inspecteur_id` | Identifiant d'un inspecteur (missions auxquelles il participe) | `?inspecteur_id=3` |
+| `date_debut` / `date_fin` | Période de début des missions (`YYYY-MM-DD`) | `?date_debut=2026-07-01&date_fin=2026-12-31` |
+
+Les filtres sont combinables et la réponse JSON (`Accept: application/json`) applique les mêmes conditions.
+
+#### Programme des inspections (export Word)
+La page **Programme** (`/inspections/programme`) présente le programme semestriel des inspections regroupé par type (`Réglementaire`, `Investigation`) puis par zone de tournée (Kinshasa, Kongo-Central, autres provinces), avec les colonnes : N°, Date, Installation, Localisation et Inspecteurs — au format du document `PROPOSITION DU PROGRAMME DES INSPECTIONS DU ... SEMESTRE ... .docx`.
+
+- **Précharger le 2ᵉ semestre 2026** (proposition du programme) :
+  ```bash
+  php artisan db:seed --class=ProgrammeInspectionsSeeder
+  ```
+- **Générer le document Word** : depuis la page Programme, cliquer sur `Exporter en Word (.docx)` (ou `GET /inspections/programme/export?annee=2026&semestre=2`).
+- **Paramètres** : `annee` (défaut : année courante), `semestre` (`1` ou `2`), `statut` (`prevues` = Brouillon/Approuvée/En cours, `toutes`).
+- Le type d'inspection **`investigation`** est disponible dans le formulaire de programmation d'une inspection.
+
 #### Identifiants de test (Seeder)
 - **Utilisateur Admin** : admin@cnpri.cd / password
 - **Exemples d'établissements** : Clinique Ngaliema, Tenke Fungurume Mining.

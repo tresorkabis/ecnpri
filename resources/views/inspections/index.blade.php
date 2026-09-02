@@ -11,6 +11,87 @@
             </a>
         </div>
 
+        {{-- Bandeau de filtres --}}
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <form method="GET" action="{{ route('inspections.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="recherche">Recherche</label>
+                    <input type="text" name="recherche" id="recherche" value="{{ $filters['recherche'] ?? '' }}"
+                           placeholder="Établissement, objet…" class="w-full shadow border rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="etablissement_id">Établissement</label>
+                    <select name="etablissement_id" id="etablissement_id" class="w-full shadow border rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        <option value="">Tous</option>
+                        @foreach($etablissements as $est)
+                            <option value="{{ $est->id }}" {{ (string) ($filters['etablissement_id'] ?? '') === (string) $est->id ? 'selected' : '' }}>
+                                {{ $est->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="inspecteur_id">Inspecteur</label>
+                    <select name="inspecteur_id" id="inspecteur_id" class="w-full shadow border rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        <option value="">Tous</option>
+                        @foreach($inspecteurs as $insp)
+                            <option value="{{ $insp->id }}" {{ (string) ($filters['inspecteur_id'] ?? '') === (string) $insp->id ? 'selected' : '' }}>
+                                {{ $insp->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="type_filtre">Type</label>
+                    <select name="type" id="type_filtre" class="w-full shadow border rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        <option value="">Tous</option>
+                        @foreach($types as $value => $label)
+                            <option value="{{ $value }}" {{ ($filters['type'] ?? '') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="statut_filtre">Statut</label>
+                    <select name="statut" id="statut_filtre" class="w-full shadow border rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        <option value="">Tous</option>
+                        @foreach($statuts as $value => $label)
+                            <option value="{{ $value }}" {{ ($filters['statut'] ?? '') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="date_debut">Du</label>
+                    <input type="date" name="date_debut" id="date_debut" value="{{ $filters['date_debut'] ?? '' }}"
+                           class="w-full shadow border rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="date_fin">Au</label>
+                    <input type="date" name="date_fin" id="date_fin" value="{{ $filters['date_fin'] ?? '' }}"
+                           class="w-full shadow border rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                </div>
+
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded shadow transition">
+                        Filtrer
+                    </button>
+                    <a href="{{ route('inspections.index') }}" class="text-gray-500 hover:text-gray-700 text-sm font-semibold px-3 py-2">
+                        Effacer
+                    </a>
+                </div>
+            </form>
+            <p class="text-xs text-gray-500 mt-3">
+                {{ $inspections->count() }} inspection(s) affichée(s)
+                @if(collect($filters)->filter()->isNotEmpty())
+                    <span class="text-blue-600">— filtres actifs</span>
+                @endif
+            </p>
+        </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">

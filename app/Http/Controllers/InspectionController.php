@@ -12,17 +12,81 @@ class InspectionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $inspections = Inspection::with(['establishment', 'inspectors'])
-            ->orderBy('start_date', 'desc')
-            ->get();
+        $filters = [
+            'recherche' => trim((string) $request->query('recherche', '')),
+            'statut' => (string) $request->query('statut', ''),
+            'type' => (string) $request->query('type', ''),
+            'etablissement_id' => (string) $request->query('etablissement_id', ''),
+            'inspecteur_id' => (string) $request->query('inspecteur_id', ''),
+            'date_debut' => (string) $request->query('date_debut', ''),
+            'date_fin' => (string) $request->query('date_fin', ''),
+        ];
 
-        if (request()->wantsJson()) {
+        $query = Inspection::with(['establishment', 'inspectors']);
+
+        // Recherche libre : nom de l'établissement ou objet de la mission
+        if ($filters['recherche'] !== '') {
+            $recherche = $filters['recherche'];
+            $query->where(function ($q) use ($recherche) {
+                $q->whereHas('establishment', fn ($sub) => $sub->where('name', 'like', "%{$recherche}%"))
+                  ->orWhere('purpose', 'like', "%{$recherche}%");
+            });
+        }
+
+        // Statut (avec le pseudo-statut "prevues" regroupant les missions planifiées)
+        if ($filters['statut'] !== '') {
+            if ($filters['statut'] === 'prevues') {
+                $query->whereIn('status', ['Brouillon', 'Approuvée', 'En cours']);
+            } else {
+                $query->where('status', $filters['statut']);
+            }
+        }
+
+        if ($filters['type'] !== '' && $filters['type'] !== 'tous') {
+            $query->where('type', $filters['type']);
+        }
+
+        if ($filters['etablissement_id'] !== '' && $filters['etablissement_id'] !== 'tous') {
+            $query->where('establishment_id', $filters['etablissement_id']);
+        }
+
+        if ($filters['inspecteur_id'] !== '' && $filters['inspecteur_id'] !== 'tous') {
+            $query->whereHas('inspectors', fn ($q) => $q->where('inspectors.id', $filters['inspecteur_id']));
+        }
+
+        if ($filters['date_debut'] !== '') {
+            $query->where('start_date', '>=', $filters['date_debut']);
+        }
+
+        if ($filters['date_fin'] !== '') {
+            $query->where('start_date', '<=', $filters['date_fin']);
+        }
+
+        $inspections = $query->orderBy('start_date', 'desc')->get();
+
+        if ($request->wantsJson()) {
             return response()->json($inspections);
         }
 
-        return view('inspections.index', compact('inspections'));
+        $statuts = [
+            'prevues' => 'Prévues (Brouillon, Approuvée, En cours)',
+            'Brouillon' => 'Brouillon',
+            'Approuvée' => 'Approuvée',
+            'En cours' => 'En cours',
+            'Effectuée' => 'Effectuée',
+            'Annulée' => 'Annulée',
+        ];
+        $types = [
+            'réglementaire' => 'Réglementaire',
+            'investigation' => 'Investigation',
+            'inopiné' => 'Inopiné',
+        ];
+        $etablissements = Establishment::orderBy('name')->get();
+        $inspecteurs = Inspector::orderBy('name')->get();
+
+        return view('inspections.index', compact('inspections', 'filters', 'statuts', 'types', 'etablissements', 'inspecteurs'));
     }
 
     /**
@@ -46,7 +110,7 @@ class InspectionController extends Controller
             'team_leader_id' => 'nullable|exists:inspectors,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'type' => 'required|string|in:réglementaire,inopiné',
+            'type' => 'required|string|in:réglementaire,inopiné,investigation',
             'purpose' => 'nullable|string',
             'inspectors' => 'required|array',
             'inspectors.*' => 'exists:inspectors,id',
@@ -155,7 +219,7 @@ class InspectionController extends Controller
             'team_leader_id' => 'nullable|exists:inspectors,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'type' => 'required|string|in:réglementaire,inopiné',
+            'type' => 'required|string|in:réglementaire,inopiné,investigation',
             'purpose' => 'nullable|string',
             'status' => 'required|string|in:Brouillon,Approuvée,En cours,Effectuée,Annulée',
             'authorized_by' => 'nullable|string',
