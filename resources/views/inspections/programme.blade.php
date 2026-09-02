@@ -15,13 +15,30 @@
     <div class="container mx-auto px-4 py-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
             <h1 class="text-3xl font-semibold text-gray-800">Proposition du Programme des Inspections</h1>
-            <a href="{{ route('inspections.programme.export', compact('annee', 'semestre', 'statut')) }}"
-               class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm rounded shadow hover:bg-green-700 transition">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
-                Exporter en Word (.docx)
-            </a>
+                        {{-- BOUTONS D'EXPORT --}}
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('inspections.programme.export', compact('annee', 'semestre', 'statut')) }}"
+                   class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm rounded shadow hover:bg-green-700 transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Word (.docx)
+                </a>
+                <a href="{{ route('inspections.programme.export.pdf', compact('annee', 'semestre', 'statut')) }}"
+                   class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm rounded shadow hover:bg-red-700 transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 2l2-2-2-2v4zm10-6h-4a2 2 0 00-2 2v4a2 2 0 002 2h4"></path>
+                    </svg>
+                    PDF
+                </a>
+                <a href="{{ route('inspections.programme.export.xlsx', compact('annee', 'semestre', 'statut')) }}"
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm rounded shadow hover:bg-blue-700 transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2H7a2 2 0 00-2 2v8zm0 0V7a2 2 0 012-2h6v6H5V7zm0 0v10h12V9h-4V5H7a2 2 0 00-2 2v6z"></path>
+                    </svg>
+                    Excel (.xlsx)
+                </a>
+            </div>
         </div>
 
         {{-- Filtres de période --}}

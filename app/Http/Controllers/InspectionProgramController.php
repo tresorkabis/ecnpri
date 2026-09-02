@@ -117,7 +117,97 @@ class InspectionProgramController extends Controller
         $writer = IOFactory::createWriter($phpWord, 'Word2007');
         $writer->save($tempFile);
 
-        return response()->download($tempFile, $this->titleFor($annee, $semestre) . '.docx')
+                return response()->download($tempFile, $this->titleFor($annee, $semestre) . '.docx')
+            ->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Exporte le programme en PDF.
+     */
+    public function exportPdf(Request $request)
+    {
+        $annee = (int) $request->query('annee', now()->format('Y'));
+        $semestre = (int) ($request->query('semestre', 2) === '2' ? 2 : 1);
+        $statut = $request->query('statut', 'prevues');
+
+        $inspections = $this->buildGroups($annee, $semestre, $statut);
+
+        // Aplatir la collection pour le tableau simple du PDF
+        $flat = collect();
+        foreach ($inspections as $groupe) {
+            foreach ($groupe['zones'] as $zone) {
+                foreach ($zone['inspections'] as $item) {
+                    $flat[] = $item['inspection'];
+                }
+            }
+        }
+
+        $pdf = \PDF::loadView('inspections.programme_pdf', compact('annee', 'semestre', 'inspections', 'flat'));
+
+        return $pdf->download($this->titleFor($annee, $semestre) . '.pdf');
+    }
+
+    /**
+     * Exporte le programme en Excel (.xlsx).
+     */
+    public function exportXlsx(Request $request)
+    {
+        $annee = (int) $request->query('annee', now()->format('Y'));
+        $semestre = (int) ($request->query('semestre', 2) === '2' ? 2 : 1);
+        $statut = $request->query('statut', 'prevues');
+
+        $inspections = $this->buildGroups($annee, $semestre, $statut);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Programme Inspections');
+
+        // En-tête
+        $sheet->setCellValue('A1', 'Proposition du Programme des Inspections - ' . $annee . ' / S' . $semestre);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+        $headers = ['N°', 'Date', 'Installation', 'Localisation', 'Type', 'Inspecteurs', 'Statut'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $cell = $col++ . '3';
+            $sheet->setCellValue($cell, $header);
+            $sheet->getStyle($cell)->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
+                        $sheet->getStyle($cell)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+            $sheet->getStyle($cell)->getFill()->getStartColor()->setRGB('4B5563');
+        }
+
+        // Données
+        $row = 4;
+        $num = 1;
+        foreach ($inspections as $groupe) {
+            foreach ($groupe['zones'] as $zone) {
+                foreach ($zone['inspections'] as $item) {
+                    $inspection = $item['inspection'];
+                    $sheet->setCellValue('A' . $row, $num++);
+                    $sheet->setCellValue('B' . $row, optional($inspection->start_date)->format('d/m/Y') ?? '—');
+                    $sheet->setCellValue('C' . $row, $inspection->establishment->name ?? '—');
+                    $sheet->setCellValue('D' . $row, $inspection->establishment->address ?? ($inspection->establishment->city ?? '—'));
+                    $sheet->setCellValue('E' . $row, ucfirst($groupe['type']));
+                    $sheet->setCellValue('F' . $row, implode(', ', $inspection->inspectors->pluck('name')->toArray()));
+                    $sheet->setCellValue('G' . $row, ucfirst($inspection->status));
+                    $row++;
+                }
+            }
+        }
+
+        // Colonnes ajustées
+        foreach (range('A', 'G') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $sheet->freezePane('A4');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'cnpri_programme_excel_');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $this->titleFor($annee, $semestre) . '.xlsx')
             ->deleteFileAfterSend(true);
     }
 

@@ -19,6 +19,9 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 // Programme des inspections : déclaré AVANT le resource afin d'éviter
 // que "programme" soit interprété comme l'identifiant {inspection}.
 Route::get('/inspections/programme', [InspectionProgramController::class, 'index'])->name('inspections.programme');
+Route::get('/inspections/programme/export/pdf', [InspectionProgramController::class, 'exportPdf'])->name('inspections.programme.export.pdf');
+Route::get('/inspections/programme/export/xlsx', [InspectionProgramController::class, 'exportXlsx'])->name('inspections.programme.export.xlsx');
+
 Route::get('/inspections/programme/export', [InspectionProgramController::class, 'export'])->name('inspections.programme.export');
 
 Route::resource('establishments', EstablishmentController::class);
