@@ -49,6 +49,28 @@ La page **Programme** (`/inspections/programme`) présente le programme semestri
 - **Paramètres** : `annee` (défaut : année courante), `semestre` (`1` ou `2`), `statut` (`prevues` = Brouillon/Approuvée/En cours, `toutes`).
 - Le type d'inspection **`investigation`** est disponible dans le formulaire de programmation d'une inspection.
 
+**Modifier le nom du Directeur des inspections (signature du programme)**
+
+Le nom, la fonction et la ville de signature se configurent dans `config/cnpri.php` :
+
+```php
+'signature_name'  => env('CNPRI_SIGNATURE_NAME', 'WANGUNA CHING-CHEY Bibiche'),
+'signature_title' => env('CNPRI_SIGNATURE_TITLE', 'Directrice des inspections'),
+'signature_ville' => env('CNPRI_SIGNATURE_VILLE', 'Kinshasa'),
+```
+
+Deux options :
+1. **Fichier `.env`** (recommandé) : ajouter / modifier
+   ```
+   CNPRI_SIGNATURE_NAME="MARTIN NGOLO Justin"
+   CNPRI_SIGNATURE_TITLE="Directeur des inspections"
+   CNPRI_SIGNATURE_VILLE="Kinshasa"
+   ```
+   puis `php artisan config:clear` (ou redémarrer le serveur).
+2. **Directement dans `config/cnpri.php`** : modifier les valeurs par défaut.
+
+Le changement s'applique à la fois à la page **Programme** et au document Word exporté.
+
 #### Identifiants de test (Seeder)
 - **Utilisateur Admin** : admin@cnpri.cd / password
 - **Exemples d'établissements** : Clinique Ngaliema, Tenke Fungurume Mining.

@@ -11,10 +11,9 @@ use PhpOffice\PhpWord\SimpleType\TblWidth;
 
 class InspectionProgramController extends Controller
 {
-    protected const SIGNATURE_NAME = 'WANGUNA CHING-CHEY Bibiche';
-    protected const SIGNATURE_TITLE = 'Directrice des inspections';
-
-    /** En-têtes de section par type d'inspection (ordre d'affichage). */
+    /**
+     * En-têtes de section par type d'inspection (ordre d'affichage).
+     */
     protected const TYPE_HEADERS = [
         'réglementaire' => 'INSPECTIONS REGLEMENTAIRES',
         'investigation' => 'INSPECTIONS D\'INVESTIGATIONS',
@@ -105,13 +104,13 @@ class InspectionProgramController extends Controller
         $section->addTextBreak(2);
         $lastDate = $this->lastInspectionDate($inspections);
         $section->addText(
-            'Fait à Kinshasa, le ' . ($lastDate ? $lastDate->format('d/m/Y') : '…/…/' . $annee),
+            'Fait à ' . config('cnpri.signature_ville') . ', le ' . ($lastDate ? $lastDate->format('d/m/Y') : '…/…/' . $annee),
             ['size' => 11],
             ['alignment' => Jc::RIGHT, 'spaceBefore' => 120]
         );
         $section->addTextBreak(2);
-        $section->addText(self::SIGNATURE_NAME, ['size' => 11, 'bold' => true], ['alignment' => Jc::RIGHT]);
-        $section->addText(self::SIGNATURE_TITLE, ['size' => 11], ['alignment' => Jc::RIGHT]);
+        $section->addText(config('cnpri.signature_name'), ['size' => 11, 'bold' => true], ['alignment' => Jc::RIGHT]);
+        $section->addText(config('cnpri.signature_title'), ['size' => 11], ['alignment' => Jc::RIGHT]);
 
         // Écriture du document
         $tempFile = tempnam(sys_get_temp_dir(), 'cnpri_programme_');

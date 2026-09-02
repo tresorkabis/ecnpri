@@ -132,9 +132,9 @@
 
         @if($inspections->isNotEmpty())
             <div class="text-right mt-10">
-                <p class="text-sm text-gray-600">Fait à Kinshasa, le …/…/{{ $annee }}</p>
-                <p class="mt-6 font-bold text-gray-800">WANGUNA CHING-CHEY Bibiche</p>
-                <p class="text-gray-700">Directrice des inspections</p>
+                <p class="text-sm text-gray-600">Fait à {{ config('cnpri.signature_ville') }}, le …/…/{{ $annee }}</p>
+                <p class="mt-6 font-bold text-gray-800">{{ config('cnpri.signature_name') }}</p>
+                <p class="text-gray-700">{{ config('cnpri.signature_title') }}</p>
             </div>
         @endif
     </div>

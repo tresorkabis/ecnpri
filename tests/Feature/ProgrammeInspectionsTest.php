@@ -76,6 +76,10 @@ class ProgrammeInspectionsTest extends TestCase
 
         // L'inspection de mars (hors 2e semestre) ne doit pas être listée
         $response->assertDontSee('01/03/2026');
+
+        // La signature configurée est affichée
+        $response->assertSee(config('cnpri.signature_name'));
+        $response->assertSee(config('cnpri.signature_title'));
     }
 
     public function test_programme_word_export_returns_valid_docx(): void
@@ -94,6 +98,13 @@ class ProgrammeInspectionsTest extends TestCase
         $zip = new \ZipArchive();
         $this->assertTrue($zip->open($file->getPathname()) === true);
         $this->assertNotFalse($zip->locateName('word/document.xml'));
+
+        // Le nom et la fonction configurés figurent dans le corps du document
+        $documentXml = $zip->getFromName('word/document.xml');
+        $text = html_entity_decode(strip_tags((string) $documentXml));
+        $this->assertStringContainsString(config('cnpri.signature_name'), $text);
+        $this->assertStringContainsString(config('cnpri.signature_title'), $text);
+
         $zip->close();
     }
 }
