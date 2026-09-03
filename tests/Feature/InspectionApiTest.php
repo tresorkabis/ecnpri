@@ -141,6 +141,29 @@ class InspectionApiTest extends TestCase
     }
 
     /**
+     * Après modification via le formulaire web, retour à la liste.
+     */
+    public function test_web_update_redirects_to_list(): void
+    {
+        $this->seed(\Database\Seeders\CnpriSeeder::class);
+
+        $data = [
+            'establishment_id' => 1,
+            'start_date' => '2026-08-01',
+            'end_date' => '2026-08-02',
+            'type' => 'inopiné',
+            'status' => 'Brouillon',
+            'inspectors' => [1],
+        ];
+
+        $response = $this->put('/inspections/4', $data);
+
+        $response->assertRedirect('/inspections');
+        $response->assertSessionHas('success', 'Inspection mise à jour avec succès.');
+        $this->assertDatabaseHas('inspections', ['id' => 4, 'start_date' => '2026-08-01 00:00:00']);
+    }
+
+    /**
      * Test cannot update a completed inspection.
      */
     public function test_cannot_update_a_completed_inspection(): void
@@ -244,5 +267,32 @@ class InspectionApiTest extends TestCase
         // Approuvée (id=3) - Ne devrait pas voir le bouton
         $response = $this->get('/inspections/3');
         $response->assertDontSee('Approuver la Mission');
+    }
+
+    /**
+     * Test suppression via le bouton de la liste web.
+     */
+    public function test_can_delete_inspection_from_web_list(): void
+    {
+        $this->seed(\Database\Seeders\CnpriSeeder::class);
+
+        $inspection = Inspection::first();
+
+        // Le bouton Supprimer est présent dans la liste
+        $index = $this->get('/inspections');
+        $index->assertStatus(200);
+        $index->assertSee('Supprimer', false);
+        $index->assertSee('confirm', false);
+
+        // Suppression (form POST avec @method DELETE)
+        $response = $this->delete('/inspections/' . $inspection->id);
+
+        $response->assertRedirect('/inspections');
+        $response->assertSessionHas('success', 'Inspection supprimée avec succès.');
+        $this->assertDatabaseMissing('inspections', ['id' => $inspection->id]);
+
+        // Le message de succès est affiché sur la liste
+        $follow = $this->get('/inspections');
+        $follow->assertSee('Inspection supprimée avec succès.');
     }
 }

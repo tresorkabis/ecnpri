@@ -212,4 +212,42 @@ class InspectionFiltersTest extends TestCase
         $this->assertSame(2, substr_count($htmlPage2, 'ETAB ANCIEN'));
         $this->assertSame(1, substr_count($htmlPage2, 'ETAB RECENT'));
     }
+
+    public function test_grouped_mode_orders_by_type_then_province_with_headers(): void
+    {
+        $etabKin = Establishment::create(['name' => 'HOPITAL GROUPE KIN', 'province' => 'Kinshasa', 'city' => 'Kinshasa']);
+        $etabKat = Establishment::create(['name' => 'USINE GROUPE KAT', 'province' => 'Haut-Katanga', 'city' => 'Lubumbashi']);
+        $etabEqu = Establishment::create(['name' => 'CLINIQUE GROUPE EQU', 'province' => 'Équateur', 'city' => 'Mbandaka']);
+
+        Inspection::create(['establishment_id' => $etabKin->id, 'type' => 'investigation', 'status' => 'Approuvée', 'purpose' => 'Test', 'start_date' => '2026-08-01', 'end_date' => '2026-08-02', 'authorized_by' => 'Le Président du CNPRI']);
+        Inspection::create(['establishment_id' => $etabKat->id, 'type' => 'réglementaire', 'status' => 'Approuvée', 'purpose' => 'Test', 'start_date' => '2026-08-01', 'end_date' => '2026-08-02', 'authorized_by' => 'Le Président du CNPRI']);
+        Inspection::create(['establishment_id' => $etabEqu->id, 'type' => 'réglementaire', 'status' => 'Approuvée', 'purpose' => 'Test', 'start_date' => '2026-08-01', 'end_date' => '2026-08-02', 'authorized_by' => 'Le Président du CNPRI']);
+
+        $response = $this->get('/inspections?groupe=1');
+        $response->assertOk();
+        $response->assertSee('GROUPE KIN', false);
+        $response->assertSee('GROUPE KAT', false);
+        $response->assertSee('GROUPE EQU', false);
+
+        // En-têtes de groupe
+        $response->assertSee("I. INSPECTIONS REGLEMENTAIRES", false);
+        $response->assertSee("II. INSPECTIONS D&#039;INVESTIGATION", false);
+        $response->assertSee('Haut-Katanga', false);
+        $response->assertSee('Équateur', false);
+        $response->assertSee('groupé par type puis province', false);
+
+        // Ordre (vérifié uniquement dans le corps du tableau, pas dans les filtres) :
+        // Réglementaire (Équateur avant Haut-Katanga) puis Investigation (Kinshasa)
+        $tbody = mb_strstr($response->getContent(), '<tbody');
+        $this->assertTrue(
+            mb_strpos($tbody, 'GROUPE EQU') < mb_strpos($tbody, 'GROUPE KAT')
+            && mb_strpos($tbody, 'GROUPE KAT') < mb_strpos($tbody, 'GROUPE KIN')
+        );
+        $this->assertTrue(
+            mb_strpos($tbody, "I. INSPECTIONS REGLEMENTAIRES") < mb_strpos($tbody, "D&#039;INVESTIGATION")
+        );
+
+        // Le bouton de retour à la liste simple est présent
+        $response->assertSee('Afficher en liste simple', false);
+    }
 }

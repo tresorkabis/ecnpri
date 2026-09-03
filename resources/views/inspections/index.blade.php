@@ -2,6 +2,14 @@
 
 @section('title', 'Planning des Inspections - CNPRI')
 
+@if(session('success'))
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+        {{ session('success') }}
+    </div>
+</div>
+@endif
+
 @php
     // Paramètres de tri issus de l'URL (sans tri/sens/page pour pouvoir basculer)
     $triQuery = collect(request()->query())->except(['tri', 'sens', 'page'])->all();
@@ -15,6 +23,14 @@
         }
         return '↕';
     };
+    $groupeUrl = $filters['groupe']
+        ? route('inspections.index', collect(request()->query())->except(['groupe', 'page'])->all())
+        : route('inspections.index', collect(request()->query())->except(['page'])->merge(['groupe' => '1'])->all());
+    $labelsType = [
+        'réglementaire' => "I. INSPECTIONS REGLEMENTAIRES",
+        'investigation' => "II. INSPECTIONS D'INVESTIGATION",
+        'inopiné' => "III. INSPECTIONS INOPINEES",
+    ];
 @endphp
 
 @section('content')
@@ -110,6 +126,12 @@
                 @if(collect($filters)->except(['tri', 'sens'])->filter()->isNotEmpty())
                     <span class="text-blue-600">— filtres actifs</span>
                 @endif
+                @if($filters['groupe'])
+                    <span class="text-indigo-600">— groupé par type puis province</span>
+                @endif
+                <a href="{{ $groupeUrl }}" class="ml-3 inline-flex items-center {{ $filters['groupe'] ? 'text-gray-600 hover:text-gray-800' : 'text-indigo-600 hover:text-indigo-800' }} font-semibold">
+                    {{ $filters['groupe'] ? 'Afficher en liste simple' : 'Grouper par type et province' }}
+                </a>
             </p>
         </div>
 
@@ -118,32 +140,71 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            @if($filters['groupe'])
+                                Date
+                            @else
                             <a href="{{ $triUrl('date') }}" class="inline-flex items-center gap-1 hover:text-blue-700 transition">
                                 Date <span class="text-gray-400">{{ $triArrow('date') }}</span>
                             </a>
+                            @endif
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            @if($filters['groupe'])
+                                Établissement
+                            @else
                             <a href="{{ $triUrl('etablissement') }}" class="inline-flex items-center gap-1 hover:text-blue-700 transition">
                                 Établissement <span class="text-gray-400">{{ $triArrow('etablissement') }}</span>
                             </a>
+                            @endif
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            @if($filters['groupe'])
+                                Type
+                            @else
                             <a href="{{ $triUrl('type') }}" class="inline-flex items-center gap-1 hover:text-blue-700 transition">
                                 Type <span class="text-gray-400">{{ $triArrow('type') }}</span>
                             </a>
+                            @endif
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inspecteurs</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            @if($filters['groupe'])
+                                Statut
+                            @else
                             <a href="{{ $triUrl('statut') }}" class="inline-flex items-center gap-1 hover:text-blue-700 transition">
                                 Statut <span class="text-gray-400">{{ $triArrow('statut') }}</span>
                             </a>
+                            @endif
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rapport</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
+                    @php $lastType = null; $lastProvince = null; @endphp
                     @forelse($inspections as $inspection)
+                    @php
+                        $provGroupe = $inspection->establishment->province
+                            ?: ($inspection->establishment->city ?: 'Autres provinces');
+                    @endphp
+                    @if($filters['groupe'])
+                        @if($lastType !== $inspection->type)
+                        <tr class="bg-indigo-50 border-t-2 border-indigo-200">
+                            <td colspan="7" class="px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-indigo-800">
+                                {{ $labelsType[$inspection->type] ?? mb_strtoupper($inspection->type) }}
+                            </td>
+                        </tr>
+                        @php $lastProvince = null; @endphp
+                        @endif
+                        @if($lastProvince !== $provGroupe)
+                        <tr class="bg-gray-50">
+                            <td colspan="7" class="px-6 py-1.5 pl-10 text-xs font-semibold text-gray-600">
+                                {{ $provGroupe }}
+                            </td>
+                        </tr>
+                        @endif
+                        @php $lastType = $inspection->type; $lastProvince = $provGroupe; @endphp
+                    @endif
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                             @if($inspection->start_date && $inspection->end_date)
@@ -194,8 +255,14 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <a href="{{ route('inspections.show', $inspection->id) }}" class="text-blue-600 hover:text-blue-900 mr-3">Détails</a>
                             @if(in_array($inspection->status, ['Brouillon', 'Approuvée', 'En cours']))
-                            <a href="{{ route('inspections.edit', $inspection->id) }}" class="text-yellow-600 hover:text-yellow-900">Modifier</a>
+                            <a href="{{ route('inspections.edit', $inspection->id) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Modifier</a>
                             @endif
+                            <form action="{{ route('inspections.destroy', $inspection->id) }}" method="POST" class="inline"
+                                  onsubmit="return confirm('Confirmez-vous la suppression définitive de cette inspection ?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-900">Supprimer</button>
+                            </form>
                         </td>
                     </tr>
                     @empty

@@ -26,6 +26,7 @@ class InspectionController extends Controller
                 ? (string) $request->query('tri')
                 : 'date',
             'sens' => $request->query('sens', 'desc') === 'asc' ? 'asc' : 'desc',
+            'groupe' => $request->query('groupe') === '1',
         ];
 
         $query = $this->buildIndexQuery($filters);
@@ -102,6 +103,35 @@ class InspectionController extends Controller
 
         // Tri (whitelist de colonnes pour éviter toute injection SQL)
         $sens = $filters['sens'];
+
+        // Mode groupé : ordre imposé type (ordre du document) → province (ordre officiel) → date
+        if (!empty($filters['groupe'])) {
+            $quote = function (string $v): string {
+                return "'" . str_replace("'", "''", $v) . "'";
+            };
+
+            // Types dans l'ordre du document : réglementaire, investigation, inopiné
+            $ordreTypes = ['réglementaire', 'investigation', 'inopiné'];
+            $casesTypes = [];
+            foreach ($ordreTypes as $i => $t) {
+                $casesTypes[] = 'WHEN ' . $quote($t) . ' THEN ' . $i;
+            }
+            $query->orderByRaw('CASE inspections.type ' . implode(' ', $casesTypes) . ' ELSE ' . count($ordreTypes) . ' END');
+
+            // Provinces dans l'ordre officiel défini dans config/cnpri.php
+            $provinces = (array) config('cnpri.provinces', []);
+            $casesProvinces = [];
+            foreach (array_keys($provinces) as $i => $p) {
+                $casesProvinces[] = 'WHEN ' . $quote($p) . ' THEN ' . $i;
+            }
+            $query->leftJoin('establishments', 'establishments.id', '=', 'inspections.establishment_id')
+                ->select('inspections.*')
+                ->orderByRaw('CASE COALESCE(establishments.province, \'\') ' . implode(' ', $casesProvinces) . ' ELSE ' . count($provinces) . ' END');
+
+            $query->orderBy('inspections.start_date', $sens);
+
+            return $query;
+        }
 
         if ($filters['tri'] === 'etablissement') {
             $query->leftJoin('establishments', 'establishments.id', '=', 'inspections.establishment_id')
@@ -297,7 +327,7 @@ class InspectionController extends Controller
             return response()->json($inspection);
         }
 
-        return redirect()->route('inspections.show', $id)->with('success', 'Inspection mise à jour avec succès.');
+        return redirect()->route('inspections.index')->with('success', 'Inspection mise à jour avec succès.');
     }
 
     /**
