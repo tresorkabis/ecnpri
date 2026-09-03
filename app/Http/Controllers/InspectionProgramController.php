@@ -20,12 +20,11 @@ class InspectionProgramController extends Controller
         'inopiné' => 'INSPECTIONS INOPINEES',
     ];
 
-    /** Ordre d'affichage des zones de tournée pour chaque type. */
-    protected const ZONE_ORDER = [
-        'réglementaire' => ['Kongo-Central', 'Kinshasa', 'Autres provinces'],
-        'investigation' => ['Kinshasa', 'Kongo-Central', 'Autres provinces'],
-        'inopiné' => ['Kinshasa', 'Kongo-Central', 'Autres provinces'],
-    ];
+    /** Ordre d'affichage des provinces (ordre officiel des 26 provinces, cf. config/cnpri.php). */
+    protected function provinceOrder(): array
+    {
+        return array_keys(config('cnpri.provinces', []));
+    }
 
     /**
      * Affiche le programme des inspections (proposé) pour un semestre donné.
@@ -241,8 +240,8 @@ class InspectionProgramController extends Controller
             $byType = $items->filter(fn ($item) => $item['inspection']->type === $type)->values();
             $zoneNames = $byType->pluck('zone')->unique();
 
-            // Tri selon l'ordre prédéfini, puis par première date de la zone, puis nom
-            $order = self::ZONE_ORDER[$type] ?? [];
+            // Tri selon l'ordre officiel des provinces, puis par première date de la province
+            $order = $this->provinceOrder();
             $zones = $zoneNames->sortBy(function ($nom) use ($order, $byType) {
                 $position = array_search($nom, $order, true);
                 $position = $position === false ? count($order) : $position;
@@ -294,27 +293,61 @@ class InspectionProgramController extends Controller
     }
 
     /**
-     * Détermine la zone de tournée (regroupement logistique) d'une inspection.
+     * Détermine la province (regroupement géographique) d'une inspection.
+     * Normalise le libellé vers la liste officielle des 26 provinces.
      */
     protected function zoneOf(Inspection $inspection): string
     {
         $province = $inspection->establishment->province
-            ?: ($inspection->establishment->city ?: 'Autres provinces');
+            ?: ($inspection->establishment->city ?: 'Non précisée');
 
-        $normalized = strtolower(trim($province));
+        return $this->normalizeProvince($province);
+    }
 
-        if ($normalized === 'kinshasa') {
-            return 'Kinshasa';
+    /**
+     * Normalise un libellé de province vers la liste officielle
+     * (gestion des tirets, accents, casse et anciennes appellations).
+     */
+    protected function normalizeProvince(string $province): string
+    {
+        $official = config('cnpri.provinces', []);
+        $input = trim($province);
+
+        // Correspondance directe (insensible à la casse)
+        foreach ($official as $nom => $chefLieu) {
+            if (strcasecmp($input, $nom) === 0) {
+                return $nom;
+            }
         }
 
-        if (in_array($normalized, [
-            'kongo central', 'kongo-central', 'kongocentral', 'kongo',
-            'bas-congo', 'bas congo',
-        ], true)) {
-            return 'Kongo-Central';
+        // Correspondance normalisée : tirets/espaces unifiés, sans accents
+        $slug = mb_strtolower(str_replace(['-', ' '], '', $this->sansAccents($input)));
+        $alias = [
+            'kongocentral' => 'Kongo-Central',
+            'kongo' => 'Kongo-Central',
+            'bascongo' => 'Kongo-Central',
+            'villeprovincialeskisangani' => 'Tshopo',
+        ];
+        if (isset($alias[$slug])) {
+            return $alias[$slug];
         }
 
-        return 'Autres provinces';
+        // Le chef-lieu saisi à la place de la province (ex. "Matadi" → Kongo-Central)
+        foreach ($official as $nom => $chefLieu) {
+            if (strcasecmp($input, $chefLieu) === 0) {
+                return $nom;
+            }
+        }
+
+        return $input;
+    }
+
+    /** Supprime les accents d'une chaîne. */
+    protected function sansAccents(string $texte): string
+    {
+        $translit = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $texte);
+
+        return $translit === false ? $texte : $translit;
     }
 
     /**

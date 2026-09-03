@@ -72,7 +72,9 @@ class ProgrammeInspectionsTest extends TestCase
         $response->assertSee('KONGO-CENTRAL');
         $response->assertSee('PERENCO REP');
         $response->assertSee('AEROPORT DE BUNIA');
-        $response->assertSee('AUTRES PROVINCES');
+        $response->assertSee('ITURI');
+        // Plus de regroupement fourre-tout : chaque province réelle est affichée
+        $response->assertDontSee('AUTRES PROVINCES');
 
         // L'inspection de mars (hors 2e semestre) ne doit pas être listée
         $response->assertDontSee('01/03/2026');
